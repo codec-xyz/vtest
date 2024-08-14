@@ -1,0 +1,15 @@
+{
+	"compilerOptions": {
+		"composite": true,
+		"skipLibCheck": true,
+		"target": "esnext",
+		"module": "esnext",
+		"moduleResolution": "bundler",
+		"strict": true,
+		"noEmit": true
+	},
+	"include": [
+		"../forge.env.d.ts",
+		"./*"
+	]
+}
