@@ -9,8 +9,8 @@ export default defineConfig(async (env) => {
 	const name = forgeConfigSelf.name ?? '';
 
 	return {
-		// `vite.svelte.config.ts` needs to be a seperate file because
-		// sveltekit build requires having a `configFile` spcified
+		// `vite.svelte.config.ts` needs to be a separate file because
+		// sveltekit build requires having a `configFile` specified
 		configFile: './vite/vite.svelte.config.ts',
 		root,
 		mode,
