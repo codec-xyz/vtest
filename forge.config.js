@@ -10,9 +10,25 @@ import { FuseV1Options, FuseVersion } from '@electron/fuses';
 const config = {
 	packagerConfig: {
 		asar: true,
+		icon: './static/icon',
 	},
 	rebuildConfig: {},
-	makers: [new MakerSquirrel({}), new MakerZIP({}, ['darwin']), new MakerRpm({}), new MakerDeb({})],
+	makers: [
+		new MakerSquirrel({
+			// A URL to an ICO file to use as the application icon (displayed in Control Panel > Programs and Features).
+			//iconUrl: 'https://url/to/icon.ico',
+			// The ICO file to use as the icon for the generated Setup.exe
+			setupIcon: './static/icon.ico'
+      }),
+	  new MakerZIP({}, ['darwin']),
+	  new MakerRpm({}),
+	  new MakerDeb({
+			options: {
+				// Path to a single image that will act as icon for the application
+				icon: './static/icon.png',
+			}
+		}),
+	],
 	plugins: [
 		new VitePlugin({
 			// `build` can specify multiple entry builds, which can be Main process, Preload scripts, Worker process, etc.
@@ -31,7 +47,7 @@ const config = {
 			renderer: [
 				{
 					name: 'main_window',
-					config: './vite/vite.svelte.config.ts',
+					config: './vite/vite.renderer.config.ts',
 				},
 			],
 		}),

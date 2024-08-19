@@ -1,8 +1,8 @@
-# ***V***ite + ***T***ypescript + ***E***lectron Forge + ***S***velte + ***T***ailwind CSS
+# ***V***ite + ***T***ypescript + ***E***lectron Forge + ***S***velte Kit + ***T***ailwind CSS
 
-Template project with Vite, Typescript, Electron Forge, Svelte, Tailwind CSS
+Template project with ***V***ite, ***T***ypescript, ***E***lectron Forge, ***S***velte Kit, ***T***ailwind CSS
 
-![](public/readme001.png)
+![](readme001.png)
 
 ```
 git clone https://github.com/codec-xyz/vtest MyAwesomeApp

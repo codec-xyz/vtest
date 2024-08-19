@@ -11,6 +11,8 @@
 		"make": "electron-forge make",
 		"publish": "electron-forge publish",
 		"lint": "eslint --ext .ts,.tsx .",
+		"svelte-dev": "vite -c vite/vite.svelte.config.ts",
+		"svelte-build": "vite build -c vite/vite.svelte.config.ts",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch"
 	},
@@ -25,6 +27,8 @@
 		"@electron-forge/plugin-vite": "^7.4.0",
 		"@electron-forge/shared-types": "^7.4.0",
 		"@electron/fuses": "^1.8.0",
+		"@sveltejs/adapter-static": "^3.0.4",
+		"@sveltejs/kit": "^2.5.22",
 		"@sveltejs/vite-plugin-svelte": "^3.0.0",
 		"@tsconfig/svelte": "^5.0.4",
 		"@types/electron-squirrel-startup": "^1.0.2",

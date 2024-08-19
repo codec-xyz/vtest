@@ -1,15 +1,60 @@
-import { app, BrowserWindow, ipcMain } from 'electron';
+import { app, BrowserWindow, ipcMain, protocol, net } from 'electron';
 import path from 'path';
+import url from 'url';
+import fs from 'fs';
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 import electronSquirrelStartup from 'electron-squirrel-startup';
 if(electronSquirrelStartup) app.quit();
 
-let mainWindow: BrowserWindow;
+let mainWindow: BrowserWindow | undefined;
+
+const scheme = 'app';
+const srcFolder = path.join(app.getAppPath(), `.vite/renderer/${MAIN_WINDOW_VITE_NAME}/`);
+const fallbackFile = path.join(srcFolder, 'index.html');
+const staticAssetsFolder = MAIN_WINDOW_VITE_DEV_SERVER_URL ? path.join(import.meta.dirname, '../../static/') : srcFolder;
+
+protocol.registerSchemesAsPrivileged([{
+		scheme: scheme,
+		privileges: {
+			standard: true,
+			secure: true,
+			allowServiceWorkers: true,
+			supportFetchAPI: true,
+			corsEnabled: false,
+		},
+	},
+]);
+
+app.on('ready', () => {
+	protocol.handle(scheme, async (request) => {
+		const requestPath = path.normalize(decodeURIComponent(new URL(request.url).pathname));
+		let responseFile: string | undefined;
+
+		function tryFile(path: string) {
+			if(responseFile !== undefined) return;
+			const fileExits = fs.existsSync(path) && fs.statSync(path).isFile();
+			if(fileExits) responseFile = path;
+		}
+
+		tryFile(path.join(srcFolder, requestPath));
+		if(path.extname(requestPath) === '' && path.basename(requestPath) !== '') {
+			tryFile(path.join(srcFolder, path.dirname(requestPath), path.basename(requestPath) + '.html'));
+		}
+		tryFile(fallbackFile);
+
+		if(responseFile === undefined) {
+			return new Response(undefined, { status: 404});
+		}
+
+		return net.fetch(url.pathToFileURL(responseFile).toString());
+	});
+});
 
 function createWindow() {
 	// Create the browser window.
 	mainWindow = new BrowserWindow({
+		icon: path.join(staticAssetsFolder, '/icon.png'),
 		width: 900,
 		height: 700,
 		minWidth: 400,
@@ -28,15 +73,15 @@ function createWindow() {
 		},
 	});
 
-	// and load the index.html of the app.
 	if(MAIN_WINDOW_VITE_DEV_SERVER_URL) {
 		mainWindow.loadURL(MAIN_WINDOW_VITE_DEV_SERVER_URL);
 
 		// Open the DevTools.
 		// mainWindow.webContents.openDevTools();
-	} else {
-		mainWindow.loadFile(path.join(import.meta.dirname, `../renderer/${MAIN_WINDOW_VITE_NAME}/index.html`));
 	}
+	else {
+		mainWindow.loadURL('app://-/');
+	 }
 }
 
 // This method will be called when Electron has finished
@@ -64,8 +109,8 @@ app.on('activate', () => {
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and import them here.
 
-ipcMain.on('toggleDevTools', () => mainWindow.webContents.toggleDevTools());
-ipcMain.on('setTitleBarColors', (event, bgColor, iconColor) => mainWindow.setTitleBarOverlay({
+ipcMain.on('toggleDevTools', () => mainWindow && mainWindow.webContents.toggleDevTools());
+ipcMain.on('setTitleBarColors', (event, bgColor, iconColor) => mainWindow && mainWindow.setTitleBarOverlay({
 	color: bgColor,
 	symbolColor: iconColor,
 	height: 40
