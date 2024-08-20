@@ -11,7 +11,7 @@ let mainWindow: BrowserWindow | undefined;
 
 const scheme = 'app';
 const srcFolder = path.join(app.getAppPath(), `.vite/renderer/${MAIN_WINDOW_VITE_NAME}/`);
-const fallbackFile = path.join(srcFolder, 'index.html');
+const fallbackFile = '200.html';
 const staticAssetsFolder = MAIN_WINDOW_VITE_DEV_SERVER_URL ? path.join(import.meta.dirname, '../../static/') : srcFolder;
 
 protocol.registerSchemesAsPrivileged([{
@@ -31,20 +31,20 @@ app.on('ready', () => {
 		const requestPath = path.normalize(decodeURIComponent(new URL(request.url).pathname));
 		let responseFile: string | undefined;
 
-		function tryFile(path: string) {
+		function tryFile(tryFilePath: string) {
 			if(responseFile !== undefined) return;
-			const fileExits = fs.existsSync(path) && fs.statSync(path).isFile();
-			if(fileExits) responseFile = path;
+			const fullTryFilePath = path.join(srcFolder, tryFilePath);
+			const fileExits = fs.existsSync(fullTryFilePath) && fs.statSync(fullTryFilePath).isFile();
+			if(fileExits) responseFile = fullTryFilePath;
 		}
 
-		tryFile(path.join(srcFolder, requestPath));
-		if(path.extname(requestPath) === '' && path.basename(requestPath) !== '') {
-			tryFile(path.join(srcFolder, path.dirname(requestPath), path.basename(requestPath) + '.html'));
-		}
+		tryFile(requestPath);
+		if(path.basename(requestPath) === '') tryFile('index.html');
+		else tryFile(path.join(path.dirname(requestPath), path.basename(requestPath) + '.html'));
 		tryFile(fallbackFile);
 
 		if(responseFile === undefined) {
-			return new Response(undefined, { status: 404});
+			return new Response(null, { status: 404});
 		}
 
 		return net.fetch(url.pathToFileURL(responseFile).toString());

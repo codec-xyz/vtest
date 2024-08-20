@@ -22,7 +22,9 @@ const config = {
 		// If your environment is not supported, or you settled on a specific environment, switch out the adapter.
 		// See https://kit.svelte.dev/docs/adapters for more information about adapters.
 		adapter: adapter({
-			//fallback: '200.html',
+			// SPA (Single-page application)
+			// https://kit.svelte.dev/docs/single-page-apps
+			fallback: '200.html',
 
 			pages: '.vite/renderer/main_window',
 			assets: '.vite/renderer/main_window',
