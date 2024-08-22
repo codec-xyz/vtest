@@ -1,30 +1,35 @@
-import type { ConfigEnv, UserConfig } from 'vite';
-import { defineConfig, mergeConfig } from 'vite';
-import { getBuildConfig, getBuildDefine, external, pluginHotRestart } from './vite.base.config';
+import { external, ElectronForgeVite, getViteDevServerUrls, VitePlugin_RestartElectron } from './vite.base.config';
 
-//https://vitejs.dev/config
-export default defineConfig((env) => {
-	const forgeEnv = env as ConfigEnv<'build'>;
-	const { forgeConfigSelf } = forgeEnv;
-	const define = getBuildDefine(forgeEnv);
-	const config: UserConfig = {
+export default ElectronForgeVite.defineConfig<'build'>((env) => {
+	const { root, mode, command } = env;
+
+	return {
+		root,
+		mode,
 		build: {
+			outDir: '.vite/build/main',
+
+			watch: command === 'serve' ? {} : null,
+			minify: command === 'build',
+
 			lib: {
-				entry: forgeConfigSelf.entry!,
+				entry: env.forgeConfigSelf.entry!,
 				fileName: () => '[name].js',
 				formats: ['es'],
 			},
+
 			rollupOptions: {
 				external,
 			},
 		},
-		plugins: [pluginHotRestart('restart')],
-		define,
+		plugins: [VitePlugin_RestartElectron()],
+		define: {
+			VITE_DEV_SERVER_URLS: JSON.stringify(getViteDevServerUrls(env)),
+		},
 		resolve: {
 			// Load the Node.js entry.
 			mainFields: ['module', 'jsnext:main', 'jsnext'],
 		},
+		clearScreen: false,
 	};
-
-	return mergeConfig(getBuildConfig(forgeEnv), config);
 });

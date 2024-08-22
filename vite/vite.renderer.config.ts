@@ -1,12 +1,8 @@
-import type { ConfigEnv, UserConfig } from 'vite';
-import { defineConfig } from 'vite';
-import { pluginExposeRenderer } from './vite.base.config';
+import type { UserConfig } from 'vite';
+import { ElectronForgeVite, VitePlugin_ExposeRenderer } from './vite.base.config';
 
-//https://vitejs.dev/config
-export default defineConfig(async (env) => {
-	const forgeEnv = env as ConfigEnv<'renderer'>;
-	const { root, mode, forgeConfigSelf } = forgeEnv;
-	const name = forgeConfigSelf.name ?? '';
+export default ElectronForgeVite.defineConfig<'renderer'>((env) => {
+	const { root, mode } = env;
 
 	return {
 		// `vite.svelte.config.ts` needs to be a separate file because
@@ -20,7 +16,7 @@ export default defineConfig(async (env) => {
 		// 	outDir: `.vite/renderer/${name}`,
 		// },
 		plugins: [
-			pluginExposeRenderer(name),
+			VitePlugin_ExposeRenderer(env.forgeConfigSelf.name ?? ''),
 		],
 		resolve: {
 			preserveSymlinks: true,

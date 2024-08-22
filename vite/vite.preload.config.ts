@@ -1,17 +1,21 @@
-import type { ConfigEnv, UserConfig } from 'vite';
-import { defineConfig, mergeConfig } from 'vite';
-import { getBuildConfig, external, pluginHotRestart } from './vite.base.config';
+import { external, VitePlugin_ReloadRenderers, ElectronForgeVite } from './vite.base.config';
 
-//https://vitejs.dev/config
-export default defineConfig((env) => {
-	const forgeEnv = env as ConfigEnv<'build'>;
-	const { forgeConfigSelf } = forgeEnv;
-	const config: UserConfig = {
+export default ElectronForgeVite.defineConfig<'build'>((env) => {
+	const { root, mode, command } = env;
+
+	return {
+		root,
+		mode,
 		build: {
+			outDir: '.vite/build/preload',
+
+			watch: command === 'serve' ? {} : null,
+			minify: command === 'build',
+
 			rollupOptions: {
 				external,
 				// Preload scripts may contain Web assets, so use the `build.rollupOptions.input` instead `build.lib.entry`.
-				input: forgeConfigSelf.entry!,
+				input: env.forgeConfigSelf.entry!,
 				output: {
 					format: 'commonjs',
 					// It should not be split chunks.
@@ -22,8 +26,7 @@ export default defineConfig((env) => {
 				},
 			},
 		},
-		plugins: [pluginHotRestart('reload')],
+		plugins: [VitePlugin_ReloadRenderers()],
+		clearScreen: false,
 	};
-
-	return mergeConfig(getBuildConfig(forgeEnv), config);
 });

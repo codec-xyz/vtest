@@ -1,69 +1,76 @@
 import { builtinModules } from 'node:module';
 import type { AddressInfo } from 'node:net';
-import type { ConfigEnv, Plugin, UserConfig } from 'vite';
+import type { ConfigEnv as ViteConfigEnv, Plugin, UserConfig, ViteDevServer } from 'vite';
+import { VitePluginConfig as ElectronForgeVitePluginConfig } from '@electron-forge/plugin-vite/src/Config';
 import pkg from '../package.json';
 
 export const builtins = ['electron', ...builtinModules.map((m) => [m, `node:${m}`]).flat()];
 
 export const external = [...builtins, ...Object.keys('dependencies' in pkg ? (pkg.dependencies as Record<string, unknown>) : {})];
 
-export function getBuildConfig(env: ConfigEnv<'build'>): UserConfig {
-	const { root, mode, command } = env;
-
-	return {
-		root,
-		mode,
-		build: {
-			// Prevent multiple builds from interfering with each other.
-			emptyOutDir: false,
-			// 🚧 Multiple builds may conflict.
-			outDir: '.vite/build',
-			watch: command === 'serve' ? {} : null,
-			minify: command === 'build',
-		},
-		clearScreen: false,
+export namespace ElectronForgeVite {
+	export interface ConfigEnv<K extends keyof ElectronForgeVitePluginConfig> extends ViteConfigEnv {
+		root: string;
+		forgeConfig: ElectronForgeVitePluginConfig;
+		forgeConfigSelf: ElectronForgeVitePluginConfig[K][number];
+	}
+	
+	type UserConfigFnObject<K extends keyof ElectronForgeVitePluginConfig> = (env: ConfigEnv<K>) => UserConfig;
+	type UserConfigFnPromise<K extends keyof ElectronForgeVitePluginConfig> = (env: ConfigEnv<K>) => Promise<UserConfig>;
+	type UserConfigFn<K extends keyof ElectronForgeVitePluginConfig> = (env: ConfigEnv<K>) => UserConfig | Promise<UserConfig>;
+	type UserConfigExport<K extends keyof ElectronForgeVitePluginConfig> = UserConfig | Promise<UserConfig> | UserConfigFnObject<K> | UserConfigFnPromise<K> | UserConfigFn<K>;
+	/**
+	 * Type helper to make it easier to use vite.config.ts
+	 * accepts a direct {@link UserConfig} object, or a function that returns it.
+	 * The function receives a {@link ConfigEnv} object.
+	 */
+	export function defineConfig<K extends keyof ElectronForgeVitePluginConfig>(config: UserConfig): UserConfig
+	export function defineConfig<K extends keyof ElectronForgeVitePluginConfig>(config: Promise<UserConfig>): Promise<UserConfig>
+	export function defineConfig<K extends keyof ElectronForgeVitePluginConfig>(config: UserConfigFnObject<K>): UserConfigFnObject<K>
+	export function defineConfig<K extends keyof ElectronForgeVitePluginConfig>(config: UserConfigExport<K>): UserConfigExport<K> {
+		return config
 	};
 }
 
-export function getDefineKeys(names: string[]) {
-	const define: { [name: string]: VitePluginRuntimeKeys } = {};
+/**
+ * Returns an object containing the Vite dev server urls for all renderers. If not dev mode returns
+ * an empty object. This can be passed to Vite in `config.define` and then accessed inside `main.js`
+ * to set the correct dev server url. The output may look something like this...
+ * ```
+ * {
+ * 	['main_window']: 'http://localhost:5173/'
+ * }
+ * ```
+ */
+export function getViteDevServerUrls(env: ElectronForgeVite.ConfigEnv<'build'>): typeof VITE_DEV_SERVER_URLS {
+	if(env.command !== 'serve') return {};
 
-	return names.reduce((acc, name) => {
-		const NAME = name.toUpperCase();
-		const keys: VitePluginRuntimeKeys = {
-			VITE_DEV_SERVER_URL: `${NAME}_VITE_DEV_SERVER_URL`,
-			VITE_NAME: `${NAME}_VITE_NAME`,
-		};
+	const devServerUrls: Record<string, string> = {};
+	for(const renderer of env.forgeConfig.renderer) {
+		const name = renderer.name ?? '';
+		const url = process.env[`VITE_DEV_SERVER_URL_${name.toUpperCase()}`];
+		devServerUrls[name] = url ?? '';
+	}
 
-		return { ...acc, [name]: keys };
-	}, define);
+	return devServerUrls;
 }
 
-export function getBuildDefine(env: ConfigEnv<'build'>) {
-	const { command, forgeConfig } = env;
-	const names = forgeConfig.renderer.filter(({ name }) => name != null).map(({ name }) => name!);
-	const defineKeys = getDefineKeys(names);
-	const define = Object.entries(defineKeys).reduce((acc, [name, keys]) => {
-		const { VITE_DEV_SERVER_URL, VITE_NAME } = keys;
-		const def = {
-			[VITE_DEV_SERVER_URL]: command === 'serve' ? JSON.stringify(process.env[VITE_DEV_SERVER_URL]) : undefined,
-			[VITE_NAME]: JSON.stringify(name),
-		};
-		return { ...acc, ...def };
-	}, {} as Record<string, any>);
+export const viteDevServers: Record<string, ViteDevServer> = {};
 
-	return define;
-}
-
-export function pluginExposeRenderer(name: string): Plugin {
-	const { VITE_DEV_SERVER_URL } = getDefineKeys([name])[name];
+/**
+ * Vite plugin
+ * - Exposes the renderer dev server url in dev mode. Use with `getViteDevServerUrls` to access the exposed
+ * dev server urls.
+ * - Adds server to global `viteDevServers` in order to be reloaded along with the preload script.
+ */
+export function VitePlugin_ExposeRenderer(name: string): Plugin {
+	const VITE_DEV_SERVER_URL = `VITE_DEV_SERVER_URL_${name.toUpperCase()}`
 
 	return {
 		name: '@electron-forge/plugin-vite:expose-renderer',
 		configureServer(server) {
-			process.viteDevServers ??= {};
 			// Expose server for preload scripts hot reload.
-			process.viteDevServers[name] = server;
+			viteDevServers[name] = server;
 
 			server.httpServer?.once('listening', () => {
 				const addressInfo = server.httpServer!.address() as AddressInfo;
@@ -74,19 +81,32 @@ export function pluginExposeRenderer(name: string): Plugin {
 	};
 }
 
-export function pluginHotRestart(command: 'reload' | 'restart'): Plugin {
+/**
+ * Vite plugin - restarts electron whenever this Vite bundle is generated. Use this for your main Electron Node process
+ * aka `main.js` for live reloading in dev mode.
+ */
+export function VitePlugin_RestartElectron(): Plugin {
 	return {
-		name: '@electron-forge/plugin-vite:hot-restart',
+		name: 'restart-electron',
 		closeBundle() {
-			if (command === 'reload') {
-				for (const server of Object.values(process.viteDevServers)) {
-					// Preload scripts hot reload.
-					server.ws.send({ type: 'full-reload' });
-				}
-			} else {
-				// Main process hot restart.
-				// https://github.com/electron/forge/blob/v7.2.0/packages/api/core/src/api/start.ts#L216-L223
-				process.stdin.emit('data', 'rs');
+			// Main process hot restart.
+			// https://github.com/electron/forge/blob/v7.2.0/packages/api/core/src/api/start.ts#L216-L223
+			process.stdin.emit('data', 'rs');
+		},
+	};
+}
+
+/**
+ * Vite plugin - reloads all renderers whenever this Vite bundle is generated. Use this for your preload
+ * for live reloading in dev mode.
+ */
+export function VitePlugin_ReloadRenderers(): Plugin {
+	return {
+		name: 'reload-all-renderers',
+		closeBundle() {
+			for (const server of Object.values(viteDevServers)) {
+				// Preload scripts hot reload.
+				server.ws.send({ type: 'full-reload' });
 			}
 		},
 	};

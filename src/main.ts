@@ -10,9 +10,9 @@ if(electronSquirrelStartup) app.quit();
 let mainWindow: BrowserWindow | undefined;
 
 const scheme = 'app';
-const srcFolder = path.join(app.getAppPath(), `.vite/renderer/${MAIN_WINDOW_VITE_NAME}/`);
+const srcFolder = path.join(app.getAppPath(), `.vite/renderer/main_window/`);
 const fallbackFile = '200.html';
-const staticAssetsFolder = MAIN_WINDOW_VITE_DEV_SERVER_URL ? path.join(import.meta.dirname, '../../static/') : srcFolder;
+const staticAssetsFolder = import.meta.env.DEV ? path.join(import.meta.dirname, '../../static/') : srcFolder;
 
 protocol.registerSchemesAsPrivileged([{
 		scheme: scheme,
@@ -69,12 +69,12 @@ function createWindow() {
 			height: 40
 		},
 		webPreferences: {
-			preload: path.join(import.meta.dirname, 'preload.js'),
+			preload: path.join(import.meta.dirname, '../preload/preload.js'),
 		},
 	});
 
-	if(MAIN_WINDOW_VITE_DEV_SERVER_URL) {
-		mainWindow.loadURL(MAIN_WINDOW_VITE_DEV_SERVER_URL);
+	if(import.meta.env.DEV) {
+		mainWindow.loadURL(VITE_DEV_SERVER_URLS['main_window']);
 
 		// Open the DevTools.
 		// mainWindow.webContents.openDevTools();
