@@ -1,15 +1,12 @@
 <script lang="ts">
 	import '../app.css';
 	import Devtools from '../lib/Devtools.svelte';
-	import { browser } from '$app/environment';
 	import { preferredTheme } from '../lib/preferredTheme';
 
-	if(browser) {
-		preferredTheme.subscribe(theme => {
-			if(theme === 'dark') window.setTitleBarColors('#374151', '#f8fafc');
-			else window.setTitleBarColors('#e5e7eb', '#020617');
-		});
-	}
+	preferredTheme.subscribe(theme => {
+		if(theme === 'dark') window.setTitleBarColors('#374151', '#f8fafc');
+		else window.setTitleBarColors('#e5e7eb', '#020617');
+	});
 </script>
 
 <div id='titlebar' class='shrink-0 bg-gradient-to-r from-gray-100 to-gray-200 flex text-slate-950 dark:from-[#273141] dark:to-gray-700 dark:text-slate-50'>

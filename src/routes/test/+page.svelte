@@ -3,9 +3,6 @@
 		Test Page
 	</h1>
 	<div class='m-auto w-fit mt-16'>
-		This page is prerendered.
-	</div>
-	<div class='m-auto w-fit mt-16'>
 		<a href='/'>Back Home</a>
 	</div>
 </div>

@@ -1,6 +1,5 @@
-import { browser } from '$app/environment';
 import { writable, type Writable } from 'svelte/store'
 
-const prefersDarkMode = browser ? window.matchMedia('(prefers-color-scheme: dark)') : undefined;
-export const preferredTheme: Writable<string> = writable(prefersDarkMode && prefersDarkMode.matches ? 'dark' : 'light');
-if(prefersDarkMode) prefersDarkMode.addEventListener('change', e => preferredTheme.set(e.matches ? 'dark' : 'light'));
+const prefersDarkMode = window.matchMedia('(prefers-color-scheme: dark)');
+export const preferredTheme: Writable<string> = writable(prefersDarkMode.matches ? 'dark' : 'light');
+prefersDarkMode.addEventListener('change', e => preferredTheme.set(e.matches ? 'dark' : 'light'));
