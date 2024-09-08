@@ -1,7 +1,7 @@
 <script lang="ts">
 	import '../app.css';
-	import Devtools from '../lib/Devtools.svelte';
-	import { preferredTheme } from '../lib/preferredTheme';
+	import Devtools from '$lib/Devtools.svelte';
+	import { preferredTheme } from '$lib/preferredTheme';
 
 	preferredTheme.subscribe(theme => {
 		if(theme === 'dark') window.setTitleBarColors('#374151', '#f8fafc');
