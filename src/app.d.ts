@@ -2,12 +2,11 @@
 /// <reference types="@sveltejs/kit" />
 /// <reference types="vite/client" />
 
+import type { ExposeInRendererTypes } from './preload.ts';
+
 declare global {
-	interface Window {
-		// Lets typescript know about exposed preload functions
-		toggleDevTools: typeof import('./preload.ts').toggleDevTools;
-		setTitleBarColors: typeof import('./preload.ts').setTitleBarColors;
-	}
+	// Lets typescript know about exposed preload functions
+	interface Window extends ExposeInRendererTypes {}
 
 	// See https://kit.svelte.dev/docs/types#app
 	// for information about these interfaces
