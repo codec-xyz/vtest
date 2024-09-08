@@ -1,7 +1,7 @@
 import { app, BrowserWindow, ipcMain, protocol, net } from 'electron';
 import path from 'path';
 import url from 'url';
-import fs from 'fs';
+import { stat } from 'node:fs/promises';
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 import electronSquirrelStartup from 'electron-squirrel-startup';
@@ -31,17 +31,21 @@ app.on('ready', () => {
 		const requestPath = path.normalize(decodeURIComponent(new URL(request.url).pathname));
 		let responseFile: string | undefined;
 
-		function tryFile(tryFilePath: string) {
+		async function tryFile(tryFilePath: string) {
 			if(responseFile !== undefined) return;
 			const fullTryFilePath = path.join(srcFolder, tryFilePath);
-			const fileExits = fs.existsSync(fullTryFilePath) && fs.statSync(fullTryFilePath).isFile();
-			if(fileExits) responseFile = fullTryFilePath;
+
+			try {
+				const fileExists = (await stat(fullTryFilePath)).isFile();
+				if(fileExists) responseFile = fullTryFilePath;
+			}
+			catch(e) {}
 		}
 
-		tryFile(requestPath);
-		if(path.basename(requestPath) === '') tryFile('index.html');
-		else tryFile(path.join(path.dirname(requestPath), path.basename(requestPath) + '.html'));
-		tryFile(fallbackFile);
+		await tryFile(requestPath);
+		if(path.basename(requestPath) === '') await tryFile('index.html');
+		else await tryFile(path.join(path.dirname(requestPath), path.basename(requestPath) + '.html'));
+		await tryFile(fallbackFile);
 
 		if(responseFile === undefined) {
 			return new Response(null, { status: 404});
