@@ -7,7 +7,20 @@ import { stat } from 'node:fs/promises';
 import electronSquirrelStartup from 'electron-squirrel-startup';
 if(electronSquirrelStartup) app.quit();
 
-let mainWindow: BrowserWindow | undefined;
+// Only one instance of the electron main process should be running due to how chromium works.
+// If another instance of the main process is already running `app.requestSingleInstanceLock()`
+// will return false, `app.quit()` will be called, and the other instances will receive a
+// `'second-instance'` event.
+// https://www.electronjs.org/docs/latest/api/app#apprequestsingleinstancelockadditionaldata
+if(!app.requestSingleInstanceLock()) {
+	app.quit();
+}
+
+// This event will be called when a second instance of the app tries to run.
+// https://www.electronjs.org/docs/latest/api/app#event-second-instance
+app.on('second-instance', (event, args, workingDirectory, additionalData) => {
+	createWindow();
+});
 
 const scheme = 'app';
 const srcFolder = path.join(app.getAppPath(), `.vite/renderer/main_window/`);
@@ -57,7 +70,7 @@ app.on('ready', () => {
 
 function createWindow() {
 	// Create the browser window.
-	mainWindow = new BrowserWindow({
+	const mainWindow = new BrowserWindow({
 		icon: path.join(staticAssetsFolder, '/icon.png'),
 		width: 900,
 		height: 700,
@@ -72,6 +85,7 @@ function createWindow() {
 			symbolColor: '#f8fafc',
 			height: 40
 		},
+		backgroundColor: '#374151',
 		webPreferences: {
 			preload: path.join(import.meta.dirname, '../preload/preload.js'),
 		},
@@ -113,9 +127,14 @@ app.on('activate', () => {
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and import them here.
 
-ipcMain.on('toggleDevTools', () => mainWindow && mainWindow.webContents.toggleDevTools());
-ipcMain.on('setTitleBarColors', (event, bgColor, iconColor) => mainWindow && mainWindow.setTitleBarOverlay({
-	color: bgColor,
-	symbolColor: iconColor,
-	height: 40
-}));
+ipcMain.on('toggleDevTools', (event) => event.sender.toggleDevTools());
+ipcMain.on('setTitleBarColors', (event, bgColor, iconColor) => {
+	const window = BrowserWindow.fromWebContents(event.sender);
+	if(window === null) return;
+
+	window.setTitleBarOverlay({
+		color: bgColor,
+		symbolColor: iconColor,
+		height: 40
+	});
+});
