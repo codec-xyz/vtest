@@ -24,7 +24,6 @@ app.on('second-instance', (event, args, workingDirectory, additionalData) => {
 
 const scheme = 'app';
 const srcFolder = path.join(app.getAppPath(), `.vite/renderer/main_window/`);
-const fallbackFile = '200.html';
 const staticAssetsFolder = import.meta.env.DEV ? path.join(import.meta.dirname, '../../static/') : srcFolder;
 
 protocol.registerSchemesAsPrivileged([{
@@ -42,29 +41,19 @@ protocol.registerSchemesAsPrivileged([{
 app.on('ready', () => {
 	protocol.handle(scheme, async (request) => {
 		const requestPath = path.normalize(decodeURIComponent(new URL(request.url).pathname));
-		let responseFile: string | undefined;
 
-		async function tryFile(tryFilePath: string) {
-			if(responseFile !== undefined) return;
-			const fullTryFilePath = path.join(srcFolder, tryFilePath);
-
+		async function isFile(filePath: string) {
 			try {
-				const fileExists = (await stat(fullTryFilePath)).isFile();
-				if(fileExists) responseFile = fullTryFilePath;
+				if((await stat(filePath)).isFile()) return filePath;
 			}
 			catch(e) {}
 		}
 
-		await tryFile(requestPath);
-		if(path.basename(requestPath) === '') await tryFile('index.html');
-		else await tryFile(path.join(path.dirname(requestPath), path.basename(requestPath) + '.html'));
-		await tryFile(fallbackFile);
+		const responseFilePath = await isFile(path.join(srcFolder, requestPath))
+		?? await isFile(path.join(srcFolder, path.dirname(requestPath), `${path.basename(requestPath) || 'index'}.html`))
+		?? path.join(srcFolder, '200.html');
 
-		if(responseFile === undefined) {
-			return new Response(null, { status: 404});
-		}
-
-		return net.fetch(url.pathToFileURL(responseFile).toString());
+		return await net.fetch(url.pathToFileURL(responseFilePath).toString());
 	});
 });
 
