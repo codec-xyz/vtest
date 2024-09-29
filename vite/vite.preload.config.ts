@@ -1,32 +1,27 @@
-import { external, VitePlugin_ReloadRenderers, ElectronForgeVite } from './vite.base.config';
+import { defineConfig } from 'vite';
+import { external } from './shared';
 
-export default ElectronForgeVite.defineConfig<'build'>((env) => {
-	const { root, mode, command } = env;
-
-	return {
-		root,
-		mode,
-		build: {
-			outDir: '.vite/build/preload',
-
-			watch: command === 'serve' ? {} : null,
-			minify: command === 'build',
-
-			rollupOptions: {
-				external,
-				// Preload scripts may contain Web assets, so use the `build.rollupOptions.input` instead `build.lib.entry`.
-				input: env.forgeConfigSelf.entry!,
-				output: {
-					format: 'commonjs',
-					// It should not be split chunks.
-					inlineDynamicImports: true,
-					entryFileNames: '[name].js',
-					chunkFileNames: '[name].js',
-					assetFileNames: '[name].[ext]',
-				},
+export default defineConfig({
+	build: {
+		outDir: '.vite/build/preload',
+		minify: true,
+		rollupOptions: {
+			external,
+			// Preload scripts may contain Web assets, so use the `build.rollupOptions.input` instead `build.lib.entry`.
+			input: './src/preload.ts',
+			output: {
+				format: 'commonjs',
+				// It should not be split chunks.
+				inlineDynamicImports: true,
+				entryFileNames: '[name].js',
+				chunkFileNames: '[name].js',
+				assetFileNames: '[name].[ext]',
 			},
 		},
-		plugins: [VitePlugin_ReloadRenderers()],
-		clearScreen: false,
-	};
+	},
+	resolve: {
+		// Load the Node.js entry.
+		mainFields: ['module', 'jsnext:main', 'jsnext'],
+	},
+	clearScreen: false,
 });

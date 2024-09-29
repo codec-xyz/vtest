@@ -1,35 +1,23 @@
-import { external, ElectronForgeVite, getViteDevServerUrls, VitePlugin_RestartElectron } from './vite.base.config';
+import { defineConfig } from 'vite';
+import { external } from './shared';
 
-export default ElectronForgeVite.defineConfig<'build'>((env) => {
-	const { root, mode, command } = env;
-
-	return {
-		root,
-		mode,
-		build: {
-			outDir: '.vite/build/main',
-
-			watch: command === 'serve' ? {} : null,
-			minify: command === 'build',
-
-			lib: {
-				entry: env.forgeConfigSelf.entry!,
-				fileName: () => '[name].js',
-				formats: ['es'],
-			},
-
-			rollupOptions: {
-				external,
-			},
+export default defineConfig({
+	build: {
+		outDir: '.vite/build/main',
+		minify: true,
+		lib: {
+			entry: './src/main.ts',
+			fileName: () => '[name].js',
+			formats: ['es'],
 		},
-		plugins: [VitePlugin_RestartElectron()],
-		define: {
-			VITE_DEV_SERVER_URLS: JSON.stringify(getViteDevServerUrls(env)),
+
+		rollupOptions: {
+			external,
 		},
-		resolve: {
-			// Load the Node.js entry.
-			mainFields: ['module', 'jsnext:main', 'jsnext'],
-		},
-		clearScreen: false,
-	};
+	},
+	resolve: {
+		// Load the Node.js entry.
+		mainFields: ['module', 'jsnext:main', 'jsnext'],
+	},
+	clearScreen: false,
 });
