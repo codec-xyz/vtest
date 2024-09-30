@@ -10,13 +10,18 @@
 		"package": "electron-forge package",
 		"make": "electron-forge make",
 		"publish": "electron-forge publish",
-		"lint": "eslint --ext .ts,.tsx .",
-		"svelte-dev": "vite -c vite/vite.svelte.config.ts",
-		"svelte-build": "vite build -c vite/vite.svelte.config.ts",
+		"svelte-dev": "vite -c vite/vite.renderer.config.ts",
+		"svelte-build": "vite build -c vite/vite.renderer.config.ts",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
-		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch"
+		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
+		"test": "vitest"
 	},
 	"devDependencies": {
+		"typescript": "^5.0.0",
+		"ts-node": "^10.9.2",
+		"vite": "^5.4.8",
+		"globals": "^15.0.0",
+
 		"@electron-forge/cli": "^7.5.0",
 		"@electron-forge/maker-deb": "^7.5.0",
 		"@electron-forge/maker-rpm": "^7.5.0",
@@ -25,24 +30,20 @@
 		"@electron-forge/plugin-auto-unpack-natives": "^7.5.0",
 		"@electron-forge/plugin-fuses": "^7.5.0",
 		"@electron/fuses": "^1.8.0",
-		"@sveltejs/adapter-static": "^3.0.4",
-		"@sveltejs/kit": "^2.6.1",
-		"@sveltejs/vite-plugin-svelte": "^3.0.0",
-		"@tsconfig/svelte": "^5.0.4",
 		"@types/electron-squirrel-startup": "^1.0.2",
-		"@typescript-eslint/eslint-plugin": "^8.7.0",
-		"@typescript-eslint/parser": "^8.7.0",
-		"autoprefixer": "^10.4.20",
 		"electron": "32.1.2",
-		"eslint": "^8.57.0",
-		"eslint-plugin-import": "^2.29.1",
+		
+		"svelte": "^5.0.0-next.1",
+		"svelte-check": "^4.0.0",
+		"@sveltejs/kit": "^2.0.0",
+		"@sveltejs/vite-plugin-svelte": "^4.0.0-next.6",
+		"@sveltejs/adapter-static": "^3.0.0",
+		
 		"postcss": "^8.4.41",
-		"svelte": "^4.2.10",
-		"svelte-check": "^4.0.4",
+		"autoprefixer": "^10.4.20",
 		"tailwindcss": "^3.4.10",
-		"ts-node": "^10.9.2",
-		"typescript": "^5.0.0",
-		"vite": "^5.4.8"
+
+		"vitest": "^2.0.0"
 	},
 	"keywords": [],
 	"author": {

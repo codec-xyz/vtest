@@ -1,10 +1,12 @@
 <script lang="ts">
 	import '../app.css';
 	import Devtools from '$lib/Devtools.svelte';
-	import { preferredTheme } from '$lib/preferredTheme';
+	import { preferredTheme } from '$lib/preferredTheme.svelte';
 
-	preferredTheme.subscribe(theme => {
-		if(theme === 'dark') window.setTitleBarColors('#374151', '#f8fafc');
+	let { children } = $props();
+
+	$effect(() => {
+		if(preferredTheme.theme === 'dark') window.setTitleBarColors('#374151', '#f8fafc');
 		else window.setTitleBarColors('#e5e7eb', '#020617');
 	});
 </script>
@@ -16,7 +18,7 @@
 	{/if}
 </div>
 <div class='overflow-auto h-full bg-gradient-to-br from-white to-zinc-50 text-slate-950 dark:from-zinc-800 dark:to-zinc-900 dark:text-slate-50'>
-	<slot></slot>
+	{@render children()}
 </div>
 
 <style>
