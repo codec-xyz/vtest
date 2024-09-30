@@ -4,12 +4,16 @@ Template project with ***V***ite, ***T***ypescript, ***E***lectron Forge, ***S**
 
 > [!Note]
 >
+> This is the Svelte 4 branch.
+
+> [!Note]
+>
 > This template contains numerous comments with explanations and links throughout the source code.
 
 ![](readme001.png)
 
 ```
-git clone https://github.com/codec-xyz/vtest MyAwesomeApp
+git clone -b svelte-4 https://github.com/codec-xyz/vtest MyAwesomeApp
 
 cd MyAwesomeApp
 
