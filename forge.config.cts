@@ -8,8 +8,22 @@ import { ElectronForgeVitePlugin, OnRebuildDo } from './electronForgeVitePlugin.
 import { type ForgeConfig } from '@electron-forge/shared-types';
 
 const config: ForgeConfig = {
+	// https://electron.github.io/packager/main/interfaces/Options.html
 	packagerConfig: {
 		asar: true,
+		ignore: (file: string) => {
+			if(file === '') return false;
+			if(file.startsWith('/package.json')) return false;
+			if(file.startsWith('/node_modules/.bin')) return true;
+			if(file.startsWith('/node_modules/.vite')) return true;
+			if(file.startsWith('/node_modules')) return false;
+			if(file.startsWith('/.vite')) return false;
+
+			return true;
+		},
+		// "Walks the node_modules dependency tree to remove all of the packages specified in the devDependencies
+		// section of package.json from the outputted Electron app. Defaults to true."
+		prune: true,
 		icon: './static/icon',
 	},
 	rebuildConfig: {},
