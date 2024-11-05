@@ -20,12 +20,6 @@ npm run start
 
 > [!Note]
 >
-> This template uses the currently still not released Svelte 5. If you want to use Svelte 4 git clone the svelte-4 branch...
->
-> `git clone -b svelte-4 https://github.com/codec-xyz/vtest MyAwesomeApp`
-
-> [!Note]
->
 > Typescript will complain in the editor when you first clone the template. When you first run `npm run start` a `.svelte-kit` folder will be generated and the errors and warnings should go away.
 
 # How the template works
