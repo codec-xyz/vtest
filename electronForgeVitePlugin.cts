@@ -28,7 +28,7 @@ export type Config = {
 		configFile: string,
 		/**
 		 * Used as the key to an object containing the Vite dev server urls for all renderers.
-		 * If not in dev mode then this is an empty object. The value may look something like this...
+		 * The object may look something like this if you set the name to `'main_window'`...
 		 * ```
 		 * {
 		 * 	['main_window']: 'http://localhost:5173/'
