@@ -6,7 +6,7 @@ Template project with ***V***ite, ***T***ypescript, ***E***lectron Forge, ***S**
 >
 > This template contains numerous comments with explanations and links throughout the source code.
 
-![](readme001.png)
+![](./static/readme001.png)
 
 ```
 git clone https://github.com/codec-xyz/vtest MyAwesomeApp

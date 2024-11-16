@@ -1,4 +1,4 @@
-import { screen as electronScreen, Notification } from "electron";
+import { screen as electronScreen } from "electron";
 
 export function initDisplayData() {
 
@@ -37,21 +37,6 @@ export function initDisplayData() {
             // TODO: Add support for stacked and grid displays
             // I don't have a stacked or grid display to test with, so this is untested.
             console.warn('LINE 37 - displayData.ts - Stacked and grid displays are not supported yet. Using primary display.');
-            console.log('Checking if notifications are supported in displayData:', Notification.isSupported());
-            const NOTIFICATION_TITLE = 'Basic Notification'
-            const NOTIFICATION_BODY = 'Notification from the Main process'
-
-            if (Notification.isSupported()) {
-                console.log('Attempting to show notification from displayData...');
-                const notification = new Notification({
-                    title: NOTIFICATION_TITLE,
-                    body: NOTIFICATION_BODY
-                });
-                notification.show();
-                console.log('Notification shown from displayData');
-            } else {
-                console.log('Notifications are not supported (in displayData)');
-            }
             return { Primary: primaryDisplay }
         }
     }

@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, protocol, net, Notification } from 'electron';
+import { app, BrowserWindow, ipcMain, protocol, net } from 'electron';
 import path from 'path';
 import url from 'url';
 import { stat } from 'node:fs/promises';
@@ -83,20 +83,6 @@ app.on('ready', () => {
 function createWindow() {
 	const displayData = initDisplayData();
 	console.log("Line 18 - main.ts - displayData: ", displayData);
-
-	// Show notification about display configuration if needed
-	console.log('Checking if notifications are supported:', Notification.isSupported());
-	if (Notification.isSupported()) {
-		console.log('Attempting to show notification...');
-		const notification = new Notification({
-			title: 'Display Configuration',
-			body: 'Stacked and grid displays are not supported yet. Using primary display.'
-		});
-		notification.show();
-		console.log('Notification shown');
-	} else {
-		console.log('Notifications are not supported on this system');
-	}
 
 	const windowOptions = {
 		...windowOptionsCommon,
