@@ -8,7 +8,7 @@ export default defineConfig({
 		rollupOptions: {
 			external,
 			// Preload scripts may contain Web assets, so use the `build.rollupOptions.input` instead `build.lib.entry`.
-			input: './src/preload.ts',
+			input: './src/electron/preload.ts',
 			output: {
 				format: 'commonjs',
 				// It should not be split chunks.
