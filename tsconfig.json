@@ -11,12 +11,18 @@
 		"outDir": "dist",
 		"moduleResolution": "node",
 		"resolveJsonModule": true,
-
+		"paths": {
+			"$lib": ["src/lib"],
+			"$lib/*": ["src/lib/*"]
+		},
 		"allowImportingTsExtensions": true,
 		"noEmit": true,
 	},
 	"include": [
 		"forge.config.cts",
 		"electronForgeVitePlugin.cts",
-	],
+		"src/**/*.ts",
+		"src/**/*.js",
+		"src/**/*.svelte"
+	]
 }
