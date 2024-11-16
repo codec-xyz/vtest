@@ -1,0 +1,10 @@
+{
+  "Create Log Message for Variable": {
+    "scope": "javascript,typescript",
+    "prefix": "logVar",
+    "body": [
+      "console.log(\"Line ${TM_LINE_NUMBER} - ${TM_FILENAME} - ${1:varName}: \", ${1:varName});"
+    ],
+    "description": "Log variable to console with line number and filename"
+  }
+}
