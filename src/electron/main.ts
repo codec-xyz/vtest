@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, protocol, net } from 'electron';
+import { app, BrowserWindow, protocol, net } from 'electron';
 import path from 'path';
 import url from 'url';
 import { stat } from 'node:fs/promises';
@@ -24,6 +24,9 @@ const windowOptionsCommon = {
 	autoHideMenuBar: true,
 	show: false,
 	webPreferences: {
+		sandbox: true,
+		contextIsolation: true,
+		nodeIntegration: false,
 		preload: path.join(import.meta.dirname, '../preload/preload.js'),
 	},
 };
@@ -32,21 +35,13 @@ const windowOptionsCommon = {
 import electronSquirrelStartup from 'electron-squirrel-startup';
 if (electronSquirrelStartup) app.quit();
 
-// Only one instance of the electron main process should be running due to how chromium works.
-// If another instance of the main process is already running `app.requestSingleInstanceLock()`
-// will return false, `app.quit()` will be called, and the other instances will receive a
-// `'second-instance'` event.
-// https://www.electronjs.org/docs/latest/api/app#apprequestsingleinstancelockadditionaldata
 if (!app.requestSingleInstanceLock()) {
 	app.quit();
 }
 
-// This event will be called when a second instance of the app tries to run.
-// https://www.electronjs.org/docs/latest/api/app#event-second-instance
 app.on('second-instance', (event, args, workingDirectory, additionalData) => {
 	createWindow();
 });
-
 
 
 protocol.registerSchemesAsPrivileged([{
@@ -94,8 +89,6 @@ function createWindow() {
 
 	if (import.meta.env.DEV) {
 		mainWindow.loadURL(VITE_DEV_SERVER_URLS['main_window']);
-
-		// Open the DevTools.
 		mainWindow.webContents.openDevTools();
 	}
 	else {

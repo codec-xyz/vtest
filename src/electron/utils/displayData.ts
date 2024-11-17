@@ -37,6 +37,7 @@ export function initDisplayData() {
             // TODO: Add support for stacked and grid displays
             // I don't have a stacked or grid display to test with, so this is untested.
             console.warn('LINE 37 - displayData.ts - Stacked and grid displays are not supported yet. Using primary display.');
+
             return { Primary: primaryDisplay }
         }
     }
