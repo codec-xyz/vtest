@@ -4,29 +4,24 @@ import { MakerDeb } from '@electron-forge/maker-deb';
 import { MakerRpm } from '@electron-forge/maker-rpm';
 import { FusesPlugin } from '@electron-forge/plugin-fuses';
 import { FuseV1Options, FuseVersion } from '@electron/fuses';
-import { ElectronForgeVitePlugin, OnRebuildDo } from './electronForgeVitePlugin.cts';
+import { ForgePlugin_Vite, OnRebuildDo } from './build-plugins/forge-plugin.vite';
 import { type ForgeConfig } from '@electron-forge/shared-types';
 
 const config: ForgeConfig = {
 	// https://electron.github.io/packager/main/interfaces/Options.html
 	packagerConfig: {
 		asar: true,
-		ignore: (file: string) => {
-			if(file === '') return false;
-			if(file.startsWith('/package.json')) return false;
-			if(file.startsWith('/node_modules/.bin')) return true;
-			if(file.startsWith('/node_modules/.vite')) return true;
-			if(file.startsWith('/node_modules')) return false;
-			if(file.startsWith('/.vite')) return false;
-
-			return true;
-		},
-		// "Walks the node_modules dependency tree to remove all of the packages specified in the devDependencies
-		// section of package.json from the outputted Electron app. Defaults to true."
-		prune: true,
+		// prune - "Walks the node_modules dependency tree to remove all of the packages specified in the
+		// devDependencies section of package.json from the outputted Electron app. Defaults to true."
+		//
+		// Keep this false. The Forge Vite plugin handles deleting `node_modules` itself.
+		prune: false,
 		icon: './static/icon',
 	},
-	rebuildConfig: {},
+	rebuildConfig: {
+		//force: true,
+		disablePreGypCopy: true,
+	},
 	makers: [
 		new MakerSquirrel({
 			// A URL to an ICO file to use as the application icon (displayed in Control Panel > Programs and Features).
@@ -44,16 +39,16 @@ const config: ForgeConfig = {
 		}),
 	],
 	plugins: [
-		new ElectronForgeVitePlugin({
+		new ForgePlugin_Vite({
 			builds: [{
-				configFile: './vite/vite.main.config.ts',
+				configFile: './vite.main.config.ts',
 				onRebuild: OnRebuildDo.RestartApp,
 			},{
-				configFile: './vite/vite.preload.config.ts',
+				configFile: './vite.preload.config.ts',
 				onRebuild: OnRebuildDo.RestartRenderers,
 			}],
 			renderers: [{
-				configFile: './vite/vite.renderer.config.ts',
+				configFile: './vite.renderer.config.ts',
 				name: 'main_window',
 			}],
 		}),

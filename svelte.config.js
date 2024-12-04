@@ -18,6 +18,16 @@ const config = {
 			relative: false,
 		},
 
+		files: {
+			assets: 'static',
+			lib: "src-renderer/lib",
+			params: "src-renderer/params",
+			routes: "src-renderer/routes",
+			serviceWorker: "src-renderer/service-worker",
+			appTemplate: "src-renderer/app.html",
+			errorTemplate: "src-renderer/error.html",
+		},
+
 		// adapter-auto only supports some environments, see https://kit.svelte.dev/docs/adapter-auto for a list.
 		// If your environment is not supported, or you settled on a specific environment, switch out the adapter.
 		// See https://kit.svelte.dev/docs/adapters for more information about adapters.
@@ -26,8 +36,8 @@ const config = {
 			// https://kit.svelte.dev/docs/single-page-apps
 			fallback: '200.html',
 
-			pages: '.vite/renderer/main_window',
-			assets: '.vite/renderer/main_window',
+			pages: '.vite/main_window',
+			assets: '.vite/main_window',
 		})
 	}
 };

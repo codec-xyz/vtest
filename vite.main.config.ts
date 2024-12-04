@@ -1,20 +1,21 @@
 import { defineConfig } from 'vite';
-import { external } from './shared';
+import { builtinModules } from 'node:module';
 
 export default defineConfig({
 	build: {
-		outDir: '.vite/build/main',
-		minify: true,
+		outDir: '.vite/main',
+		minify: 'esbuild',
 		lib: {
-			entry: './src/main.ts',
+			entry: './src-main/main.ts',
 			fileName: () => '[name].js',
 			formats: ['es'],
 		},
-
+		
 		rollupOptions: {
-			external,
+			external: ['electron', ...builtinModules.map((m) => [m, `node:${m}`]).flat()],
 		},
 	},
+	plugins: [],
 	resolve: {
 		// Load the Node.js entry.
 		mainFields: ['module', 'jsnext:main', 'jsnext'],

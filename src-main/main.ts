@@ -23,7 +23,7 @@ app.on('second-instance', (event, args, workingDirectory, additionalData) => {
 });
 
 const scheme = 'app';
-const srcFolder = path.join(app.getAppPath(), `.vite/renderer/main_window/`);
+const srcFolder = path.join(app.getAppPath(), `.vite/main_window/`);
 const staticAssetsFolder = import.meta.env.DEV ? path.join(import.meta.dirname, '../../static/') : srcFolder;
 
 protocol.registerSchemesAsPrivileged([{

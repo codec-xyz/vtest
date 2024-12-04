@@ -1,14 +1,18 @@
 import { defineConfig } from 'vite';
-import { external } from './shared';
+import { builtinModules } from 'node:module';
 
 export default defineConfig({
 	build: {
-		outDir: '.vite/build/preload',
-		minify: true,
+		outDir: '.vite/preload',
+		minify: 'esbuild',
 		rollupOptions: {
-			external,
+			external: ['electron', ...builtinModules.map((m) => [m, `node:${m}`]).flat()],
 			// Preload scripts may contain Web assets, so use the `build.rollupOptions.input` instead `build.lib.entry`.
-			input: './src/preload.ts',
+			// Also `build.rollupOptions.input` allows for multiple entry points.
+			// https://rollupjs.org/configuration-options/#input
+			input: {
+				'preload': './src-renderer/preload.ts'
+			},
 			output: {
 				format: 'commonjs',
 				// It should not be split chunks.
