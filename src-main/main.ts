@@ -34,6 +34,8 @@ protocol.registerSchemesAsPrivileged([{
 			allowServiceWorkers: true,
 			supportFetchAPI: true,
 			corsEnabled: false,
+			stream: true, // video stream from schema
+			codeCache: true,
 		},
 	},
 ]);
