@@ -90,8 +90,7 @@ The build system looks like this...
 		- [`vite.preload.config.ts`](./vite.preload.config.ts)
 		- [`vite.renderer.config.ts`](./vite.renderer.config.ts) - Svelte/Svelte Kit is implemented as a Vite plugin which is passed here
 			- [`svelte.config.js`](./svelte.config.js)
-			- [`postcss.config.js`](./postcss.config.js) - Tailwind CSS dependency
-				- [`tailwind.config.ts`](./tailwind.config.ts)
+			- [`tailwind.config.ts`](./tailwind.config.ts)
 
 ## Forge Plugin - Vite
 
